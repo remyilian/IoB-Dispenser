@@ -7,14 +7,22 @@
 #include <BlynkEdgent.h>
 #include <Arduino.h>
 #include <FastLED.h>
+#include <FlowSensor_Arduino.h>
+
+FlowSensor FlowMeter(YFS201, pin);
+
+void IRAM_ATTR count()
+{
+  FlowMeter.count();
+}
+
 
 void setup()
 {
-  Serial.begin(115200);
-  delay(100);
-
+  
   BlynkEdgent.begin();
   fastled_init();
+  FlowMeter.begin(count);
 }
 
 void loop()
@@ -53,4 +61,23 @@ void courtesy_fx(effect)
   default:
     break;
   }
+}
+
+void get_volume(){
+  		FlowMeter.read();
+      return FlowMeter.getVolume();
+}
+
+void dispense(float volume){
+  volume = volume/33.814;//convert volume in oz to liters that sensor will return
+  //close valve and reset counter
+  digitalWrite(D0,HIGH);
+  FlowMeter.resetVolume();
+  //dispense until target volume has flowed
+  while(volume>get_volume()){
+    digitalWrite(D0,LOW); //open valve
+  }
+  //close valve and reset counter
+  digitalWrite(D0,HIGH);
+  FlowMeter.resetVolume();
 }
