@@ -1,85 +1,69 @@
 #include <Arduino.h>
-#include <FastLED.h>
-#include <FlowSensor.h>
+#include <drink_dispenser_control.h>
 
-//fastled memory
-CRGB courtesy[12];
-//flowmeter
-FlowSensor FlowMeter(YFS201, D1);
-//how much juice do you want
-int BorgQty=10;
+const int buttonPin = D2;      // Pin connected to the button
+const int solenoidPin = D0;    // Pin connected to the solenoid valve
+const int flowMeterPin = D1;   // Pin connected to the flow meter
 
-//idk the flowmeter lib says to do this with an esp
-void IRAM_ATTR count()
-{
-  FlowMeter.count();
+volatile int pulseCount = 0;   // Variable to count the pulses from the flow meter
+float flowRate = 0.0;          // Flow rate in liters per minute
+float totalLiters = 0.0;       // Total dispensed liters
+
+// Constants for flow meter calibration
+const float calibrationFactor = 5880.0;    // Pulses per liter
+const float ouncesPerLiter = 33.814;       // Ounces per liter
+
+void IRAM_ATTR pulseCounter() {
+  pulseCount++;
 }
 
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(solenoidPin, OUTPUT);
+  pinMode(flowMeterPin, INPUT_PULLUP);
 
-void setup()
-{
+  attachInterrupt(digitalPinToInterrupt(flowMeterPin), pulseCounter, FALLING);
+
+  Serial.begin(115200);
+  initializeLEDs();
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    updateButtonLEDs(true);    // Turn on the button LEDs
+    dispenseBeverage(10);      // Dispense 10 ounces of beverage
+    updateButtonLEDs(false);   // Turn off the button LEDs
+    delay(2000);               // Delay to prevent button bouncing
+  }
+}
+
+void dispenseBeverage(float ounces) {
+  float litersToDispense = ounces / ouncesPerLiter;
+  float pulsesToDispense = litersToDispense * calibrationFactor;
   
-  // setup ws2812, gpio2, grb order, name courtesy,12 leds
-  FastLED.setMaxPowerInVoltsAndMilliamps(5,400); 
-  FastLED.addLeds<WS2812, 2, GRB>(courtesy, 12);
-  FastLED.clear();
-  FastLED.show();
-  //init flowmeter
-  FlowMeter.begin(count);
+  pulseCount = 0;
+  totalLiters = 0.0;
+  
+  digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
 
-  //set pins
-  pinMode(D2, INPUT_PULLUP);
-}
+  while (pulseCount < pulsesToDispense) {
+    flowRate = pulseCount / (millis() / 60000.0);
+    totalLiters = pulseCount / calibrationFactor;
+    
+    Serial.print("Flow Rate: ");
+    Serial.print(flowRate);
+    Serial.print(" L/min");
+    
+    Serial.print("  Total Dispensed: ");
+    Serial.print(totalLiters);
+    Serial.println(" L");
 
-void loop()
-{
-  if (digitalRead(D2) == HIGH){
-    dispense(BorgQty);
+    delay(500);  // Adjust delay as per your requirements
   }
-}
 
-void courtesy_set(int start,int stop,int h,int s,int v)
-{
-  courtesy[start,stop] = CHSV(h,s,v);
-  FastLED.show();
-}
+  digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
+  pulseCount = 0;
+  totalLiters = 0.0;
 
-void courtesy_fx(int effect)
-{
-  switch (effect)
-  {
-  case 0:
-    courtesy_set(0, 11, 0, 0, 0);
-    break;
-  case 1:
-    courtesy_set(0, 11, 255, 255, 255);
-    break;
-  case 2:
-    courtesy_set(2, 3, 255, 255, 64);
-    courtesy_set(5, 6, 255, 255, 64);
-    break;
-
-  default:
-    courtesy_set(0, 11, 0, 0, 0);
-    break;
-  }
-}
-
-float get_volume(){
-  		FlowMeter.read();
-      return FlowMeter.getVolume();
-}
-
-void dispense(float volume){
-  volume = volume/33.814;//convert volume in oz to liters that sensor will return
-  //close valve and reset counter
-  digitalWrite(D0,HIGH);
-  FlowMeter.resetVolume();
-  //dispense until target volume has flowed
-  while(volume>get_volume()){
-    digitalWrite(D0,LOW); //open valve
-  }
-  //close valve and reset counter
-  digitalWrite(D0,HIGH);
-  FlowMeter.resetVolume();
+  Serial.println("Dispensing complete");
 }
