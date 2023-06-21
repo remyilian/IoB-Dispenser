@@ -1,15 +1,19 @@
-#define BLYNK_TEMPLATE_ID "TMPL2wO-7VsYy"
-#define BLYNK_TEMPLATE_NAME "IoB Dispenser"
-#define BLYNK_FIRMWARE_VERSION "0.1.0"
-#define BLYNK_PRINT Serial
-#define USE_NODE_MCU_BOARD
+//#define BLYNK_TEMPLATE_ID "TMPL2wO-7VsYy"
+//#define BLYNK_TEMPLATE_NAME "IoB Dispenser"
+//#define BLYNK_FIRMWARE_VERSION "0.1.0"
+//#define BLYNK_PRINT Serial
+//#define USE_NODE_MCU_BOARD
 
-#include <BlynkEdgent.h>
+//#include <BlynkEdgent.h>
 #include <Arduino.h>
 #include <FastLED.h>
-#include <FlowSensor_Arduino.h>
+#include <FlowSensor.h>
 
-FlowSensor FlowMeter(YFS201, pin);
+//fastled
+CRGB courtesy[12];
+
+
+FlowSensor FlowMeter(YFS201, D1);
 
 void IRAM_ATTR count()
 {
@@ -20,25 +24,26 @@ void IRAM_ATTR count()
 void setup()
 {
   
-  BlynkEdgent.begin();
+  //BlynkEdgent.begin();
   fastled_init();
   FlowMeter.begin(count);
 }
 
 void loop()
 {
-  BlynkEdgent.run();
+  //BlynkEdgent.run();
 }
 
-void fastled_init()
-{
-  // set up ws2812, gpio2, grb order, name courtesy,12 leds
-  FastLED.addLeds<WS2812, 2, GRB>(courtesy, 12);
-  FastLED.clear();
-  FastLED.show();
-}
+// void fastledinit()
+// {
+//   // set up ws2812, gpio2, grb order, name courtesy,12 leds
+//   FastLED.setMaxPowerInVoltsAndMilliamps(5,400); 
+//   FastLED.addLeds<WS2812, 2, GRB>(courtesy[12], 12);
+//   FastLED.clear();
+//   FastLED.show();
+// }
 
-void courtesy_set(start, stop, h, s, v)
+void courtesyset(start, stop, h, s, v)
 {
   courtesy[start, stop] = CHSV(h, s, v);
   FastLED.show();
