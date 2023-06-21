@@ -1,69 +1,71 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
 #include <drink_dispenser_control.h>
 
-const int buttonPin = D2;      // Pin connected to the button
-const int solenoidPin = D0;    // Pin connected to the solenoid valve
-const int flowMeterPin = D1;   // Pin connected to the flow meter
+// Wi-Fi credentials
+const char* ssid = "your_SSID";
+const char* password = "your_PASSWORD";
 
-volatile int pulseCount = 0;   // Variable to count the pulses from the flow meter
-float flowRate = 0.0;          // Flow rate in liters per minute
-float totalLiters = 0.0;       // Total dispensed liters
+ESP8266WebServer server(80);
 
-// Constants for flow meter calibration
-const float calibrationFactor = 5880.0;    // Pulses per liter
-const float ouncesPerLiter = 33.814;       // Ounces per liter
+int selectedQuantity = 10; // Default quantity to dispense
 
-void IRAM_ATTR pulseCounter() {
-  pulseCount++;
+// Rest of your code...
+
+void handleRoot() {
+  String webpage = "<html><body>";
+  webpage += "<h1>Smart Drink Dispenser</h1>";
+  webpage += "<p>Select the quantity to dispense:</p>";
+  webpage += "<select onchange=\"updateSelectedQuantity(this.value)\">";
+  webpage += "<option value=\"10\">10 ounces</option>";
+  webpage += "<option value=\"20\">20 ounces</option>";
+  webpage += "<option value=\"30\">30 ounces</option>";
+  webpage += "</select><br><br>";
+  webpage += "<button onclick=\"dispenseBeverage()\">Dispense Drink</button>";
+  webpage += "<script>function updateSelectedQuantity(quantity) {";
+  webpage += "selectedQuantity = parseInt(quantity);}";
+  webpage += "function dispenseBeverage() {";
+  webpage += "var xhttp = new XMLHttpRequest();";
+  webpage += "xhttp.open('GET', '/dispense', true);";
+  webpage += "xhttp.send();}</script>";
+  webpage += "</body></html>";
+
+  server.send(200, "text/html", webpage);
+}
+
+void handleDispense() {
+  updateButtonLEDs(true);          // Turn on the button LEDs
+  dispenseBeverage(selectedQuantity);  // Dispense the selected quantity of beverage
+  updateButtonLEDs(false);         // Turn off the button LEDs
+  server.send(200, "text/plain", "Drink dispensed");
 }
 
 void setup() {
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(solenoidPin, OUTPUT);
-  pinMode(flowMeterPin, INPUT_PULLUP);
+  // Rest of your setup...
 
-  attachInterrupt(digitalPinToInterrupt(flowMeterPin), pulseCounter, FALLING);
-
-  Serial.begin(115200);
   initializeLEDs();
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+  Serial.println(WiFi.localIP());
+
+  // Start the web server
+  server.on("/", handleRoot);
+  server.on("/dispense", handleDispense);
+  server.begin();
 }
 
 void loop() {
-  if (digitalRead(buttonPin) == LOW) {
-    updateButtonLEDs(true);    // Turn on the button LEDs
-    dispenseBeverage(10);      // Dispense 10 ounces of beverage
-    updateButtonLEDs(false);   // Turn off the button LEDs
-    delay(2000);               // Delay to prevent button bouncing
-  }
-}
+  // Rest of your loop...
 
-void dispenseBeverage(float ounces) {
-  float litersToDispense = ounces / ouncesPerLiter;
-  float pulsesToDispense = litersToDispense * calibrationFactor;
-  
-  pulseCount = 0;
-  totalLiters = 0.0;
-  
-  digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
+  server.handleClient();
 
-  while (pulseCount < pulsesToDispense) {
-    flowRate = pulseCount / (millis() / 60000.0);
-    totalLiters = pulseCount / calibrationFactor;
-    
-    Serial.print("Flow Rate: ");
-    Serial.print(flowRate);
-    Serial.print(" L/min");
-    
-    Serial.print("  Total Dispensed: ");
-    Serial.print(totalLiters);
-    Serial.println(" L");
-
-    delay(500);  // Adjust delay as per your requirements
-  }
-
-  digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
-  pulseCount = 0;
-  totalLiters = 0.0;
-
-  Serial.println("Dispensing complete");
+  // Rest of your loop...
 }

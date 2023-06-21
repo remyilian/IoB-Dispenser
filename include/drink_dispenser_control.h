@@ -36,4 +36,35 @@ void updateStripColor(int red, int green, int blue) {
   strip.show();
 }
 
+void dispenseBeverage(float ounces) {
+  float litersToDispense = ounces / ouncesPerLiter;
+  float pulsesToDispense = litersToDispense * calibrationFactor;
+  
+  pulseCount = 0;
+  totalLiters = 0.0;
+  
+  digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
+
+  while (pulseCount < pulsesToDispense) {
+    flowRate = pulseCount / (millis() / 60000.0);
+    totalLiters = pulseCount / calibrationFactor;
+    
+    Serial.print("Flow Rate: ");
+    Serial.print(flowRate);
+    Serial.print(" L/min");
+    
+    Serial.print("  Total Dispensed: ");
+    Serial.print(totalLiters);
+    Serial.println(" L");
+
+    delay(500);  // Adjust delay as per your requirements
+  }
+
+  digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
+  pulseCount = 0;
+  totalLiters = 0.0;
+
+  Serial.println("Dispensing complete");
+}
+
 #endif
