@@ -7,6 +7,14 @@
 const int buttonLedPin1 = D5;
 const int buttonLedPin2 = D6;
 const int buttonLedPin3 = D7;
+// flow meter
+volatile int pulseCount = 0;   // Variable to count the pulses from the flow meter
+float flowRate = 0.0;          // Flow rate in liters per minute
+float totalLiters = 0.0;       // Total dispensed liters
+// Constants for flow meter calibration
+const float calibrationFactor = 5880.0;    // Pulses per liter
+const float ouncesPerLiter = 33.814;       // Ounces per liter
+
 
 // Pin configuration for the WS2812 strip
 const int stripPin = D4;

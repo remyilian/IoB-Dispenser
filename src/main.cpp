@@ -14,6 +14,13 @@ int selectedQuantity = 10; // Default quantity to dispense
 
 // Rest of your code...
 
+//rate limiting
+unsigned int maxDispensesPerPeriod = 5;  // Maximum number of dispenses allowed per period
+unsigned int dispensesRemaining = maxDispensesPerPeriod;  // Number of remaining dispenses
+unsigned long dispensingPeriod = 60000;  // Time period in milliseconds (e.g., 1 minute)
+unsigned long lastDispenseTimestamp = 0;  // Timestamp of the last dispense
+
+
 void handleRoot() {
   String webpage = "<html><body>";
   webpage += "<h1>Smart Drink Dispenser</h1>";
@@ -35,10 +42,36 @@ void handleRoot() {
   server.send(200, "text/html", webpage);
 }
 
+
 void handleDispense() {
+  unsigned long currentTimestamp = millis();
+
+  // Check if enough time has passed since the last dispense
+  if (currentTimestamp - lastDispenseTimestamp < dispensingPeriod) {
+    unsigned long timeRemaining = dispensingPeriod - (currentTimestamp - lastDispenseTimestamp);
+    String response = "Please wait ";
+    response += timeRemaining / 1000;
+    response += " seconds before dispensing another drink.";
+    server.send(429, "text/plain", response);
+    return;
+  }
+
+  // Check if the maximum number of dispenses for the period has been reached
+  if (dispensesRemaining <= 0) {
+    server.send(429, "text/plain", "Dispense limit reached for this period.");
+    return;
+  }
+
+  // Update the rate limiting variables
+  lastDispenseTimestamp = currentTimestamp;
+  dispensesRemaining--;
+
+  // Perform the drink dispensing actions
   updateButtonLEDs(true);          // Turn on the button LEDs
   dispenseBeverage(selectedQuantity);  // Dispense the selected quantity of beverage
   updateButtonLEDs(false);         // Turn off the button LEDs
+
+  // Send the success response
   server.send(200, "text/plain", "Drink dispensed");
 }
 
