@@ -47,8 +47,10 @@ void setup()
 {
   Serial.begin(115200);
   delay(100);
-
   BlynkEdgent.begin();
+  ledProgram(1);
+  //init flow meter
+  FlowMeter.begin(FlowMeter.count());
 }
 
 void loop()
