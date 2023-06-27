@@ -93,7 +93,7 @@ void dispenseBeverage(float ounces) {
   totalLiters = 0.0;
   
   digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
-  Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
+  //Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
   ledProgram(3);
   while (pulseCount < pulsesToDispense) {
     flowRate = pulseCount / (millis() / 60000.0);
@@ -109,7 +109,7 @@ void dispenseBeverage(float ounces) {
 
     delay(500);  // Adjust delay as per your requirements
   }
-  Blynk.logEvent("dispenseAttempt", totalLiters + String("L of ") + litersToDispense + String("L dispensed"));
+  //Blynk.logEvent("dispenseAttempt", totalLiters + String("L of ") + litersToDispense + String("L dispensed"));
   digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
   Blynk.virtualWrite(V2, 0);
   pulseCount = 0;

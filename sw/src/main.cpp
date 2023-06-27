@@ -65,7 +65,7 @@ void loop()
     }
     else if (0 < dispenseVolume < 25 && rateLimit == true){
       // rate limit exceeded
-      Blynk.logEvent("dispenseAttempt", String("Thirsty fuck got rate limited trying to dispense ") + dispenseVolume + String("oz"));
+      //Blynk.logEvent("dispenseAttempt", String("Thirsty fuck got rate limited trying to dispense ") + dispenseVolume + String("oz"));
     }
   }
 }
