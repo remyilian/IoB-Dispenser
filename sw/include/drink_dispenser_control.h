@@ -7,6 +7,8 @@
 const int buttonLedPin1 = D5;
 const int buttonLedPin2 = D6;
 const int buttonLedPin3 = D7;
+
+const int solenoidPin = D0;
 // flow meter
 volatile int pulseCount = 0;   // Variable to count the pulses from the flow meter
 float flowRate = 0.0;          // Flow rate in liters per minute
@@ -22,11 +24,11 @@ const int numPixels = 8; // Number of WS2812 LEDs
 
 Adafruit_NeoPixel strip(numPixels, stripPin, NEO_GRB + NEO_KHZ800);
 
-void initializeLEDs() {
+void initializePins() {
   pinMode(buttonLedPin1, OUTPUT);
   pinMode(buttonLedPin2, OUTPUT);
   pinMode(buttonLedPin3, OUTPUT);
-
+  pinMode(solenoidPin, OUTPUT);
   strip.begin();
   strip.show(); // Initialize all pixels to off
 }
@@ -67,12 +69,19 @@ void dispenseBeverage(float ounces) {
 
     delay(500);  // Adjust delay as per your requirements
   }
-
+  Blynk.logEvent("dispenseAttempt", totalLiters + String("L of ") + litersToDispense + String("L dispensed"));
   digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
   pulseCount = 0;
   totalLiters = 0.0;
 
   Serial.println("Dispensing complete");
 }
-
+//when the dispense volume changes
+BLYNK_WRITE(V0){
+  //this could be a switch
+  if(0<param.asInt()<25){
+    //dispense volume 
+    dispenseBeverage(param.asInt());
+  }
+}
 #endif
