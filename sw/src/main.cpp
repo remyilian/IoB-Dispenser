@@ -24,7 +24,7 @@
 #define BLYNK_TEMPLATE_ID "TMPL2wO-7VsYy"
 #define BLYNK_TEMPLATE_NAME "IoB Dispenser"
 
-#define BLYNK_FIRMWARE_VERSION "0.1.0"
+#define BLYNK_FIRMWARE_VERSION "0.1.1"
 
 #define BLYNK_PRINT Serial
 // #define BLYNK_DEBUG
@@ -37,10 +37,11 @@
 // #define USE_WITTY_CLOUD_BOARD
 // #define USE_WEMOS_D1_MINI
 
-#include "BlynkEdgent.h"
+#include <BlynkEdgent.h>
 #include <drink_dispenser_control.h>
 
 int dispenseVolume=10;
+bool rateLimit=false;
 
 void setup()
 {
@@ -53,7 +54,7 @@ void setup()
 void loop()
 {
   BlynkEdgent.run();
-  if (digitalRead() == HIGH)
+  if (digitalRead(D2) == HIGH)
   {
     if (0 < dispenseVolume < 25 && rateLimit == false)
     {

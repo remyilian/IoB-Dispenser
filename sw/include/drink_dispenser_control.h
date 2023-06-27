@@ -54,7 +54,7 @@ void dispenseBeverage(float ounces) {
   totalLiters = 0.0;
   
   digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
-
+  Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
   while (pulseCount < pulsesToDispense) {
     flowRate = pulseCount / (millis() / 60000.0);
     totalLiters = pulseCount / calibrationFactor;
