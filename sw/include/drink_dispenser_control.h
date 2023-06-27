@@ -28,9 +28,6 @@ Adafruit_NeoPixel strip(numPixels, stripPin, NEO_GRB + NEO_KHZ800);
 RGBLed buttonLED(redButtonLED, greenButtonLED, blueButtonLED, RGBLed::COMMON_CATHODE);
 
 void initializePins() {
-  pinMode(buttonLedPin1, OUTPUT);
-  pinMode(buttonLedPin2, OUTPUT);
-  pinMode(buttonLedPin3, OUTPUT);
   pinMode(solenoidPin, OUTPUT);
   strip.begin();
   strip.show(); // Initialize all pixels to off
@@ -44,30 +41,30 @@ void updateStripColor(int red, int green, int blue) {
 }
 
 void ledProgram(int program){
-  switch (expression)
+  switch (program)
   {
   //basic led for init and stuff
-  case program==0
+  case 0:
     for (int i = 0; i < numPixels; i++){
       strip.setPixelColor(i, 255, 255, 255);
-      wait(300);
+      delay(300);
       strip.show();
     }
     buttonLED.fadeIn(255,255,255,20,3);
     strip.show();
     break;
   //led off
-  case program==1
+  case 1:
     strip.fill();
     buttonLED.off();
     break;
   //rate limit
-  case program==2
+  case 2:
     buttonLED.flash(RGBLed::RED, 250);
     strip.fill();
     break;
   //dispense
-  case program==3
+  case 3:
     buttonLED.crossFade(RGBLed::GREEN,RGBLed::BLUE,20,2500);
     updateStripColor(64,64,64);
     strip.setPixelColor(2, 255, 255, 255);
@@ -75,7 +72,7 @@ void ledProgram(int program){
     strip.show();
     break;
   //return to ready
-  case program==4
+  case 4:
     buttonLED.crossFade(RGBLed::BLUE,RGBLed::WHITE,20,2500);
     updateStripColor(64,64,64);
     strip.show();

@@ -49,8 +49,6 @@ void setup()
   delay(100);
   BlynkEdgent.begin();
   ledProgram(1);
-  //init flow meter
-  FlowMeter.begin(FlowMeter.count());
 }
 
 void loop()
