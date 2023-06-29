@@ -29,6 +29,7 @@ RGBLed buttonLED(redButtonLED, greenButtonLED, blueButtonLED, RGBLed::COMMON_CAT
 
 void initializePins() {
   pinMode(solenoidPin, OUTPUT);
+  pinMode(D2, INPUT);
   strip.begin();
   strip.show(); // Initialize all pixels to off
 }
