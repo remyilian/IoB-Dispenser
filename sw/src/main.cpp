@@ -23,8 +23,8 @@
 /* Read more: https://bit.ly/BlynkInject */
 #define BLYNK_TEMPLATE_ID "TMPL2wO-7VsYy"
 #define BLYNK_TEMPLATE_NAME "IoB Dispenser"
-
-#define BLYNK_FIRMWARE_VERSION "0.1.2"
+#define PRODUCT_WIFI_SSID "IoB Dispenser"
+#define BLYNK_FIRMWARE_VERSION "0.1.3"
 
 #define BLYNK_PRINT Serial
 // #define BLYNK_DEBUG
@@ -49,6 +49,7 @@ void setup()
   delay(100);
   BlynkEdgent.begin();
   ledProgram(0);
+  digitalWrite(solenoidPin, LOW);  // close the solenoid valve
 }
 
 void loop()
