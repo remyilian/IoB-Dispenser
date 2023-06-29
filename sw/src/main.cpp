@@ -24,7 +24,7 @@
 #define BLYNK_TEMPLATE_ID "TMPL2wO-7VsYy"
 #define BLYNK_TEMPLATE_NAME "IoB Dispenser"
 
-#define BLYNK_FIRMWARE_VERSION "0.1.1"
+#define BLYNK_FIRMWARE_VERSION "0.1.2"
 
 #define BLYNK_PRINT Serial
 // #define BLYNK_DEBUG
@@ -48,7 +48,7 @@ void setup()
   Serial.begin(115200);
   delay(100);
   BlynkEdgent.begin();
-  ledProgram(1);
+  ledProgram(0);
 }
 
 void loop()

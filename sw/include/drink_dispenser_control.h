@@ -88,7 +88,6 @@ void dispenseBeverage(float ounces) {
   Blynk.virtualWrite(V2, 1);
   pulseCount = 0;
   totalLiters = 0.0;
-  
   digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
   //Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
   ledProgram(3);
@@ -122,5 +121,14 @@ BLYNK_WRITE(V0){
     //dispense volume 
     dispenseBeverage(param.asInt());
   }
+}
+
+BLYNK_WRITE(V2){
+    if(param.asInt() == 1){
+      digitalWrite(solenoidPin, HIGH);   // Open the solenoid valve
+    }
+    else if(param.asInt() == 0){
+      digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
+    }
 }
 #endif
