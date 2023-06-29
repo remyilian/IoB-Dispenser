@@ -56,6 +56,7 @@ void loop()
   BlynkEdgent.run();
   if (digitalRead(D2) == HIGH)
   {
+    Serial.print("Dispense button pressed");
     if (0 < dispenseVolume < 25 && rateLimit == false)
     {
       // dispense volume

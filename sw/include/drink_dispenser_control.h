@@ -89,6 +89,7 @@ void dispenseBeverage(float ounces) {
   pulseCount = 0;
   totalLiters = 0.0;
   digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
+  Serial.print("Solenoid opened");
   //Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
   ledProgram(3);
   while (pulseCount < pulsesToDispense) {
@@ -107,6 +108,7 @@ void dispenseBeverage(float ounces) {
   }
   //Blynk.logEvent("dispenseAttempt", totalLiters + String("L of ") + litersToDispense + String("L dispensed"));
   digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
+  Serial.print("Solenoid closed");
   Blynk.virtualWrite(V2, 0);
   pulseCount = 0;
   totalLiters = 0.0;
@@ -120,15 +122,18 @@ BLYNK_WRITE(V0){
   if(0<param.asInt()<25){
     //dispense volume 
     dispenseBeverage(param.asInt());
+    Serial.print("Blynk dispense");
   }
 }
 
 BLYNK_WRITE(V2){
     if(param.asInt() == 1){
       digitalWrite(solenoidPin, HIGH);   // Open the solenoid valve
+      Serial.print("Solenoid opened from Blynk");
     }
     else if(param.asInt() == 0){
       digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
+      Serial.print("Solenoid closed from Blynk");
     }
 }
 #endif
