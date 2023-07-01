@@ -17,6 +17,7 @@ const float ouncesPerLiter = 33.814;       // Ounces per liter
 
 // Pin configuration for the WS2812 strip
 const int stripPin = D4;
+const int buttonPin = D2;
 const int numPixels = 8; // Number of WS2812 LEDs
 
 // Pin configuration for the status LEDs
@@ -29,9 +30,10 @@ RGBLed buttonLED(redButtonLED, greenButtonLED, blueButtonLED, RGBLed::COMMON_CAT
 
 void initializePins() {
   pinMode(solenoidPin, OUTPUT);
-  pinMode(D2, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
   strip.begin();
   strip.show(); // Initialize all pixels to off
+  digitalWrite(solenoidPin, LOW);  // close the solenoid valve
 }
 
 void updateStripColor(int red, int green, int blue) {
@@ -84,15 +86,19 @@ void ledProgram(int program){
 
 //dispense beverage. no respect for rate limiting
 void dispenseBeverage(float ounces) {
+  const unsigned long timeout = 10000;  // Timeout duration in milliseconds
+  unsigned long startTime = millis();   // Record the starting time
+
   float litersToDispense = ounces / ouncesPerLiter;
   float pulsesToDispense = litersToDispense * calibrationFactor;
   Blynk.virtualWrite(V2, 1);
   pulseCount = 0;
   totalLiters = 0.0;
   digitalWrite(solenoidPin, HIGH);  // Open the solenoid valve
-  Serial.print("Solenoid opened");
+  Serial.println("Solenoid opened");
   //Blynk.logEvent("dispenseAttempt", String("Dispensing ") + ounces + String("oz"));
   ledProgram(3);
+  
   while (pulseCount < pulsesToDispense) {
     flowRate = pulseCount / (millis() / 60000.0);
     totalLiters = pulseCount / calibrationFactor;
@@ -102,39 +108,47 @@ void dispenseBeverage(float ounces) {
     Serial.print(" L/min");
     
     Serial.print("  Total Dispensed: ");
-    Serial.print(totalLiters*ouncesPerLiter);
+    Serial.print(totalLiters * ouncesPerLiter);
     Serial.println(" oz");
-
+    
     delay(500);  // Adjust delay as per your requirements
+
+    // Check if the timeout has been reached
+    if (millis() - startTime >= timeout) {
+      Serial.println("Dispensing timed out");
+      break;  // Exit the while loop and return from the function
+    }
   }
+  
   //Blynk.logEvent("dispenseAttempt", totalLiters + String("L of ") + litersToDispense + String("L dispensed"));
   digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
-  Serial.print("Solenoid closed");
+  Serial.println("Solenoid closed");
   Blynk.virtualWrite(V2, 0);
   pulseCount = 0;
   totalLiters = 0.0;
-
+  
   ledProgram(4);
   Serial.println("Dispensing complete");
 }
+
 //when the dispense volume changes
 BLYNK_WRITE(V0){
   //if dispense volume is in range. blynk has more value filtering as well.
   if(0<param.asInt()<25){
     //dispense volume 
     dispenseBeverage(param.asInt());
-    Serial.print("Blynk dispense");
+    Serial.println("Blynk dispense");
   }
 }
 
 BLYNK_WRITE(V2){
     if(param.asInt() == 1){
       digitalWrite(solenoidPin, HIGH);   // Open the solenoid valve
-      Serial.print("Solenoid opened from Blynk");
+      Serial.println("Solenoid opened from Blynk");
     }
     else if(param.asInt() == 0){
       digitalWrite(solenoidPin, LOW);   // Close the solenoid valve
-      Serial.print("Solenoid closed from Blynk");
+      Serial.println("Solenoid closed from Blynk");
     }
 }
 #endif

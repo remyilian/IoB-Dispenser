@@ -26,7 +26,7 @@
 #define PRODUCT_WIFI_SSID "IoB Dispenser"
 #define BLYNK_FIRMWARE_VERSION "0.1.3"
 
-#define BLYNK_PRINT Serial
+#define BLYNK_println Serial
 // #define BLYNK_DEBUG
 
 #define APP_DEBUG
@@ -45,19 +45,19 @@ bool rateLimit=false;
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(100);
   BlynkEdgent.begin();
+  initializePins();
   ledProgram(0);
-  digitalWrite(solenoidPin, LOW);  // close the solenoid valve
 }
 
 void loop()
 {
   BlynkEdgent.run();
-  if (digitalRead(D2) == HIGH)
+  if (digitalRead(buttonPin) == LOW)
   {
-    Serial.print("Dispense button pressed");
+    Serial.println("Dispense button pressed");
     if (0 < dispenseVolume < 25 && rateLimit == false)
     {
       // dispense volume
