@@ -58,12 +58,12 @@ void loop()
   if (digitalRead(buttonPin) == LOW)
   {
     Serial.println("Dispense button pressed");
-    if (0 < dispenseVolume < 25 && rateLimit == false)
+    if (0 < dispenseVolume < 25 && !rateLimit)
     {
       // dispense volume
       dispenseBeverage(dispenseVolume);
     }
-    else if (0 < dispenseVolume < 25 && rateLimit == true){
+    else if (0 < dispenseVolume < 25 && rateLimit){
       // rate limit exceeded
       //Blynk.logEvent("dispenseAttempt", String("Thirsty fuck got rate limited trying to dispense ") + dispenseVolume + String("oz"));
     }

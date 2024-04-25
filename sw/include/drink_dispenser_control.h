@@ -4,8 +4,15 @@
 #include <Adafruit_NeoPixel.h>
 #include <RGBLed.h>
 
+// Pin configurations
+#define stripPin D4 // LED strip
+#define numPixels 8 // Number of WS2812 LEDs
+#define solenoidPin D0
+#define buttonPin D2
+#define redButtonLED D5
+#define greenButtonLED D6
+#define blueButtonLED D7
 
-const int solenoidPin = D0;
 // flow meter
 volatile int pulseCount = 0;   // Variable to count the pulses from the flow meter
 float flowRate = 0.0;          // Flow rate in liters per minute
@@ -13,17 +20,6 @@ float totalLiters = 0.0;       // Total dispensed liters
 // Constants for flow meter calibration
 const float calibrationFactor = 5880.0;    // Pulses per liter
 const float ouncesPerLiter = 33.814;       // Ounces per liter
-
-
-// Pin configuration for the WS2812 strip
-const int stripPin = D4;
-const int buttonPin = D2;
-const int numPixels = 8; // Number of WS2812 LEDs
-
-// Pin configuration for the status LEDs
-const int redButtonLED = D5;
-const int greenButtonLED = D6;
-const int blueButtonLED = D7;
 
 Adafruit_NeoPixel strip(numPixels, stripPin, NEO_GRB + NEO_KHZ800);
 RGBLed buttonLED(redButtonLED, greenButtonLED, blueButtonLED, RGBLed::COMMON_CATHODE);
@@ -111,7 +107,7 @@ void dispenseBeverage(float ounces) {
     Serial.print(totalLiters * ouncesPerLiter);
     Serial.println(" oz");
     
-    delay(500);  // Adjust delay as per your requirements
+    delay(500);
 
     // Check if the timeout has been reached
     if (millis() - startTime >= timeout) {
